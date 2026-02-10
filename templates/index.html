@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Credit Card Fraud Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #1f4037, #99f2c8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            width: 650px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background: #1f4037;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #16322c;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .fraud { color: red; }
+        .normal { color: green; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>💳 Credit Card Fraud Detection</h2>
+
+    <input type="text" id="features" placeholder="Enter 30 feature values (comma separated)">
+
+    <div>
+        <button onclick="fillFraud()">Auto Fill Fraud</button>
+        <button onclick="fillNormal()">Auto Fill Normal</button>
+    </div>
+
+    <button onclick="checkFraud()">Check Transaction</button>
+
+    <div id="result"></div>
+</div>
+
+<script>
+
+function fillFraud(){
+    document.getElementById("features").value =
+"-2.312227,1.951992,-1.609851,3.997906,-0.522188,-1.426545,-2.537387,1.391657,-2.770089,-2.772272,3.202033,-2.899907,-0.595222,-4.289254,0.389724,-1.140747,-2.830056,-0.016822,0.416956,0.126911,0.517232,-0.035049,-0.465211,0.320198,0.044519,0.177840,0.261145,-0.143276,-0.307413,-0.990214";
+}
+
+function fillNormal(){
+    document.getElementById("features").value =
+"0.098,-0.255,0.523,-1.214,0.445,0.112,0.889,-0.234,0.672,-0.543,0.112,0.221,-0.145,0.334,0.112,-0.453,0.234,0.111,0.444,0.234,-0.122,0.543,-0.234,0.111,0.098,0.333,-0.222,0.111,0.120,-0.320";
+}
+
+async function checkFraud(){
+    let input = document.getElementById("features").value;
+    let features = input.split(",").map(Number);
+
+    let response = await fetch("/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({features: features})
+    });
+
+    let data = await response.json();
+    let resultDiv = document.getElementById("result");
+
+    if(data.predictions === 1){
+        resultDiv.innerHTML = "🚨 Fraud Detected! Probability: " + data.fraud_probability.toFixed(4);
+        resultDiv.className = "fraud";
+    } else {
+        resultDiv.innerHTML = "✅ Normal Transaction. Probability: " + data.fraud_probability.toFixed(4);
+        resultDiv.className = "normal";
+    }
+}
+
+</script>
+
+</body>
+</html>
